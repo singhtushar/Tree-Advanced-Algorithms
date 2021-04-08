@@ -24,57 +24,57 @@ void IOS() {
 	freopen("output.txt", "w", stdout);
 #endif
 }
+const int MAX_N = 10005;
+vector<int> adj[MAX_N];
+int parent[MAX_N];
+int depth[MAX_N];
+vector<vector<int>> up;
+int LOG;
 
-vector<int> adj[10000];
-int up[10000][14];
-int LOG = 14;
-int parent[10000];
-int depth[10000];
-
-void dfs(int node, int par = 0, int level = 0) {
+void dfs(int node, int par = 0, int height = 0) {
 	parent[node] = par;
-	depth[node] = level;
+	depth[node] = height;
 	for (auto it : adj[node]) {
 		if (it != par)
-			dfs(it, node, level + 1);
+			dfs(it, node, height + 1);
 	}
 }
 
 void binary_lifting(int n) {
-	LOG = log2(n) + 1;
-	parent[0] = 0;
-	for (int v = 0; v < n; v++) {
+	LOG = ceil(log2(n));
+	up = vector<vector<int>>(n, vector<int>(LOG));
+	for (int v = 0; v < n; v++)
 		up[v][0] = parent[v];
-	}
-	for (int i = 1; i < LOG; i++) {
+
+	for (int j = 1; j < LOG; j++) {
 		for (int v = 0; v < n; v++) {
-			up[v][i] = up[up[v][i - 1]][i - 1];
+			up[v][j] = up[up[v][j - 1]][j - 1];
 		}
 	}
 }
 
-int lca(int u, int v) {
-	if (depth[u] < depth[v]) swap(u, v);
-	int d = depth[u] - depth[v];
-	for (int i = LOG - 1; i >= 0; i--) {
-		if (d & (1ll << i))
-			u = up[u][i];
+int lca(int a, int b) {
+	if (depth[a] < depth[b])
+		swap(a, b);
+	int k = depth[a] - depth[b];
+	for (int j = LOG - 1; j >= 0; j--) {
+		if (k & (1 << j))
+			a = up[a][j];
 	}
-	if (u == v)
-		return u;
+	if (a == b)
+		return a;
 	for (int i = LOG - 1; i >= 0; i--) {
-		if (up[u][i] != up[v][i]) {
-			u = up[u][i];
-			v = up[v][i];
+		if (up[a][i] != up[b][i]) {
+			a = up[a][i];
+			b = up[b][i];
 		}
 	}
-	return up[u][0];
+	return up[a][0];
 }
 
 signed main() {
 	IOS();
 	int t = 1;
-	int tc = 1;
 	// cin >> t;
 	while (t--) {
 		int n;
